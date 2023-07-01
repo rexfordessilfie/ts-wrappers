@@ -1,14 +1,14 @@
 import test from "ava";
-import createWrapper, { FUNC } from "../src";
+import wrapper, { FUNC } from "../src";
 
 import { expectType } from "tsd";
 
 test("has defulat export", (t) => {
-  t.truthy(createWrapper);
+  t.truthy(wrapper);
 });
 
 test("infers function types from wrapper", (t) => {
-  const doubleBinNumOp = createWrapper((next, a: number, b: number) => {
+  const doubleBinNumOp = wrapper((next, a: number, b: number) => {
     next();
     return next();
   });
@@ -25,7 +25,7 @@ test("infers function types from wrapper", (t) => {
 });
 
 test("rejects mismatched function argument type", (t) => {
-  const doubleBinNumOp = createWrapper((next, a: number, b: number) => {
+  const doubleBinNumOp = wrapper((next, a: number, b: number) => {
     next();
     return next();
   });
@@ -41,7 +41,7 @@ test("rejects mismatched function argument type", (t) => {
 });
 
 test("allows function args to extend wrapper args", (t) => {
-  const withId = createWrapper((next, ctx: { id?: string }, ..._: any[]) => {
+  const withId = wrapper((next, ctx: { id?: string }, ..._: any[]) => {
     ctx.id = "1234";
     return next();
   });
@@ -59,7 +59,7 @@ test("allows function args to extend wrapper args", (t) => {
 });
 
 test("infers wrapper return type when applied", (t) => {
-  const withRandom = createWrapper((next, ..._: any[]) => {
+  const withRandom = wrapper((next, ..._: any[]) => {
     const rand = Math.random();
 
     if (rand > 0.2) {
@@ -92,7 +92,7 @@ test("can type the next return in wrapper definition", (t) => {
     }
   }
 
-  const sanitizedApiKey = createWrapper((next, ..._: any[]) => {
+  const sanitizedApiKey = wrapper((next, ..._: any[]) => {
     const result = next<ApiKey>();
     if (!(result instanceof ApiKey)) {
       return result;
@@ -123,7 +123,7 @@ test("can type the next return in wrapper definition", (t) => {
 });
 
 test("can invoke internal function", (t) => {
-  const negateUnaryNumericOp = createWrapper((next, num: number) => {
+  const negateUnaryNumericOp = wrapper((next, num: number) => {
     return next[FUNC](-num);
   });
 

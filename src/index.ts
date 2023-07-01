@@ -1,4 +1,4 @@
-export default function createWrapper<CArgs extends any[], CReturn>(
+export default function wrapper<CArgs extends any[], CReturn>(
   cb: (next: Next, ...args: CArgs) => CReturn
 ) {
   return <FArgs extends CArgs, FReturn>(func: (...args: FArgs) => FReturn) => {
@@ -7,9 +7,19 @@ export default function createWrapper<CArgs extends any[], CReturn>(
 
       next[FUNC] = func as any;
 
-      return cb(next, ...(args as any)) as CReturn extends NextReturnType
+      return cb(
+        next,
+        ...(args as any)
+      ) as CReturn extends Promise<NextReturnType>
+        ? Replace<
+            CReturn,
+            Promise<NextReturnType>,
+            Promise<Awaited<ReturnType<typeof func>>>
+          >
+        : CReturn extends NextReturnType
         ? Replace<CReturn, NextReturnType, ReturnType<typeof func>>
         : Exclude<CReturn, NextReturnType>;
+      // TODO: deep replace all occurrences of NextReturnType with FReturn
     };
   };
 }
