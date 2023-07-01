@@ -1,5 +1,5 @@
 import test from "ava";
-import createWrapper from "../src";
+import createWrapper, { FUNC } from "../src";
 
 import { expectType } from "tsd";
 
@@ -120,4 +120,20 @@ test("can type the next return in wrapper definition", (t) => {
 
   t.is(apiKey.key, "abc****");
   t.is(apiKey.note, "test key");
+});
+
+test("can invoke internal function", (t) => {
+  const negateUnaryNumericOp = createWrapper((next, num: number) => {
+    return next[FUNC](-num);
+  });
+
+  const double = (num: number) => 2 * num;
+
+  const doubleNegate = negateUnaryNumericOp(double);
+  const ceilNegate = negateUnaryNumericOp(Math.ceil);
+
+  t.is(double(4), 8);
+
+  t.is(doubleNegate(4), -8);
+  t.is(ceilNegate(7.5), -7);
 });
