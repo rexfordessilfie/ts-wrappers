@@ -7,24 +7,15 @@ export default function wrapper<CArgs extends any[], CReturn>(
 
       next[FUNC] = func as any;
 
-      return cb(
-        next,
-        ...(args as any)
-      ) as CReturn extends Promise<NextReturnType>
-        ? Replace<
-            CReturn,
-            Promise<NextReturnType>,
-            Promise<Awaited<ReturnType<typeof func>>>
-          >
-        : CReturn extends NextReturnType
-        ? Replace<CReturn, NextReturnType, ReturnType<typeof func>>
-        : Exclude<CReturn, NextReturnType>;
-      // TODO: deep replace all occurrences of NextReturnType with FReturn
+      return cb(next, ...(args as any)) as DeepReplace<
+        CReturn,
+        NextReturnType,
+        ReturnType<typeof func>,
+        NextReturnType
+      >;
     };
   };
 }
-
-type Replace<T, U, V> = Exclude<T, U> | V;
 
 export const FUNC = Symbol();
 
@@ -46,3 +37,26 @@ type Next<ReturnType = NextReturnType> = (<
     ...args: Args
   ) => ApplyNextBrand<ReturnType>;
 };
+
+type IsEqual<A, B> = A extends B ? (B extends A ? true : false) : false;
+type LeftIfNotEqual<A, B> = IsEqual<A, B> extends false ? A : never;
+type Spreadable<T> = T extends any[] ? T : never;
+
+type DeepReplace<Source, A, B, Sentinel = never> = Source extends Sentinel
+  ? Omit<Source, keyof Sentinel> extends infer T
+    ? DeepReplace<LeftIfNotEqual<T, {}>, A, B, Sentinel> extends infer U
+      ? U | B
+      : never // Dummy ternary just so we can get an alias T
+    : never // Dummy ternary just so we can get an alias U
+  : Source extends Promise<infer T>
+  ? Promise<DeepReplace<T, A, B, Sentinel>>
+  : Source extends [infer AItem, ...infer ARest]
+  ? [
+      DeepReplace<AItem, A, B, Sentinel>,
+      ...Spreadable<DeepReplace<ARest, A, B, Sentinel>>
+    ]
+  : Source extends Record<string | number | symbol, any>
+  ? { [K in keyof Source]: DeepReplace<Source[K], A, B, Sentinel> }
+  : Source extends A
+  ? Exclude<Source, A> | B
+  : Exclude<Source, A>;

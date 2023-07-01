@@ -34,7 +34,7 @@ test("rejects mismatched function argument type", (t) => {
     return a + b;
   };
 
-  // This should have an error
+  // This should have an error since types do not match
   doubleBinNumOp(badFunc);
 
   t.truthy(true);
