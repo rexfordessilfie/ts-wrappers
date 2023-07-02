@@ -1,25 +1,22 @@
-import wrapper, { FUNC } from "../src";
+import wrapper from "../src";
+import { trace } from "./trace";
 
-export function memoize<F extends Function>(
-  hash: F,
+export function memoize<H extends (...args: any[]) => string | number | symbol>(
+  hash: H,
   cache = Object.create(null)
 ) {
   return wrapper((next, ...args: any[]) => {
     const key = hash(...args);
-
     if (!(key in cache)) {
       cache[key] = next();
-    } else {
-      console.log(`returning cached result for ${next[FUNC].name}(${args[0]})`);
     }
-
     return cache[key] as ReturnType<typeof next>;
   });
 }
 
 export function demo() {
-  let fib = (n: number): number => {
-    return n < 2 ? n : fib(n - 1) + fib(n - 2);
+  let fib = function (n: number): number {
+    return n < 2 ? n : fib(n - 2) + fib(n - 1);
   };
 
   const hash = (...args: any[]) => {
@@ -29,12 +26,11 @@ export function demo() {
   // Redefining is super important here so it is memoized for recursive calls
   fib = memoize(hash)(fib);
 
-  console.log(fib(10));
+  const tracedFib = trace(fib);
 
-  // All these are memoized!
-  console.log(fib(9));
-  console.log(fib(7));
-  console.log(fib(5));
+  console.log(tracedFib(10));
+  console.log("-----");
+  console.log(tracedFib(10));
 }
 
 demo();

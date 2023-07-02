@@ -2,9 +2,8 @@ export default function wrapper<CArgs extends any[], CReturn>(
   cb: (next: Next, ...args: CArgs) => CReturn
 ) {
   return <FArgs extends CArgs, FReturn>(func: (...args: FArgs) => FReturn) => {
-    return (...args: Parameters<typeof func>) => {
+    function fn(...args: Parameters<typeof func>) {
       const next = (() => func(...args)) as Parameters<typeof cb>[0];
-
       next[FUNC] = func as any;
 
       return cb(next, ...(args as any)) as DeepReplace<
@@ -13,7 +12,10 @@ export default function wrapper<CArgs extends any[], CReturn>(
         ReturnType<typeof func>,
         NextReturnType
       >;
-    };
+    }
+
+    Object.defineProperty(fn, "name", { value: func.name });
+    return fn;
   };
 }
 
