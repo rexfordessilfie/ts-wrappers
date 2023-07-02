@@ -1,5 +1,5 @@
 import test from "ava";
-import wrapper, { FUNC } from "../src";
+import wrapper from "../src";
 
 import { expectType } from "tsd";
 
@@ -8,7 +8,8 @@ test("has defulat export", (t) => {
 });
 
 test("infers function types from wrapper", (t) => {
-  const doubleBinNumOp = wrapper((next, a: number, b: number) => {
+  const doubleBinNumOp = wrapper((fn, a: number, b: number) => {
+    const next = () => fn(a, b);
     next();
     return next();
   });
@@ -25,7 +26,8 @@ test("infers function types from wrapper", (t) => {
 });
 
 test("rejects mismatched function argument type", (t) => {
-  const doubleBinNumOp = wrapper((next, a: number, b: number) => {
+  const doubleBinNumOp = wrapper((fn, a: number, b: number) => {
+    const next = () => fn(a, b);
     next();
     return next();
   });
@@ -41,9 +43,9 @@ test("rejects mismatched function argument type", (t) => {
 });
 
 test("allows function args to extend wrapper args", (t) => {
-  const withId = wrapper((next, ctx: { id?: string }, ..._: any[]) => {
+  const withId = wrapper((fn, ctx: { id?: string }, ...args: any[]) => {
     ctx.id = "1234";
-    return next();
+    return fn(ctx, ...args);
   });
 
   const goodFunc = (ctx: { id?: string; name: string }, _color: string) => {
@@ -59,7 +61,7 @@ test("allows function args to extend wrapper args", (t) => {
 });
 
 test("infers wrapper return type when applied", (t) => {
-  const withRandom = wrapper((next, ..._: any[]) => {
+  const withRandom = wrapper((fn, ...args: any[]) => {
     const rand = Math.random();
 
     if (rand > 0.2) {
@@ -70,7 +72,7 @@ test("infers wrapper return type when applied", (t) => {
       return "hello";
     }
 
-    return next();
+    return fn(...args);
   });
 
   const greet = () => "yo" as "yo";
@@ -81,7 +83,7 @@ test("infers wrapper return type when applied", (t) => {
   t.truthy(["hi", "hello", "yo"].includes(greetRandomized()));
 });
 
-test("can type the next return in wrapper definition", (t) => {
+test("can type the fn return in wrapper definition", (t) => {
   class ApiKey {
     note: string;
     key: string;
@@ -92,8 +94,8 @@ test("can type the next return in wrapper definition", (t) => {
     }
   }
 
-  const sanitizedApiKey = wrapper((next, ..._: any[]) => {
-    const result = next<ApiKey>();
+  const sanitizedApiKey = wrapper((fn, ...args: any[]) => {
+    const result = fn<ApiKey>(...args);
     if (!(result instanceof ApiKey)) {
       return result;
     }
@@ -123,8 +125,8 @@ test("can type the next return in wrapper definition", (t) => {
 });
 
 test("can invoke internal function", (t) => {
-  const negateUnaryNumericOp = wrapper((next, num: number) => {
-    return next[FUNC](-num);
+  const negateUnaryNumericOp = wrapper((fn, num: number) => {
+    return fn(-num);
   });
 
   const double = (num: number) => 2 * num;
