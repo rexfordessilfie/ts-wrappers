@@ -1,14 +1,4 @@
-import wrapper from "../src";
-
-export function delay(wait: number) {
-  return wrapper((next, ..._: any[]) => {
-    return new Promise<ReturnType<typeof next>>((resolve) => {
-      setTimeout(() => {
-        resolve(next());
-      }, wait);
-    });
-  });
-}
+import { delay } from "../src";
 
 export async function demo() {
   function add(a: number, b: number) {

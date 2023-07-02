@@ -1,22 +1,4 @@
-import wrapper from "../src";
-
-export function debounce(wait = 300) {
-  let timeout: any;
-
-  return wrapper((next, ..._args: any[]) => {
-    return new Promise<ReturnType<typeof next>>((resolve, reject) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(async () => {
-        try {
-          // @ts-ignore
-          resolve(await next());
-        } catch (e) {
-          reject(e);
-        }
-      }, wait);
-    });
-  });
-}
+import { debounce } from "../src";
 
 async function sleep(time: number) {
   return new Promise((resolve) => {
@@ -25,7 +7,7 @@ async function sleep(time: number) {
 }
 
 export async function demo() {
-  const debouncedLog = debounce(500)(console.log);
+  const debouncedLog = debounce(500, true)(console.log);
 
   // BEGIN
   debouncedLog("Hey there!");
@@ -73,10 +55,12 @@ export async function demo2() {
 
   for (const item of data) {
     debouncedId(item).then((x) => {
-      console.log("X!", x);
+      console.log(x.message);
     });
     await sleep(item.sleep);
   }
 }
 
+demo();
+console.log("-------");
 demo2();

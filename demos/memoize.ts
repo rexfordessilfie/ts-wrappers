@@ -1,18 +1,4 @@
-import wrapper from "../src";
-import { trace } from "./trace";
-
-export function memoize<H extends (...args: any[]) => string | number | symbol>(
-  hash: H,
-  cache = Object.create(null)
-) {
-  return wrapper((next, ...args: any[]) => {
-    const key = hash(...args);
-    if (!(key in cache)) {
-      cache[key] = next();
-    }
-    return cache[key] as ReturnType<typeof next>;
-  });
-}
+import { memoize, trace } from "../src";
 
 export function demo() {
   let fib = function (n: number): number {
