@@ -1,105 +1,126 @@
 # ts-wrappers
 
-Transparent, Type-safe wrappers for your Typescript functions
+Transparent, Type-safe wrappers for your Typescript functions.
+
+## API
+
+- `wrapper`: a helper for conveniently defining function wrappers
+- `debounce()`, `memoize()`, `retry()`, `throttle()`, and other utility wrappers
 
 ## Usage
 
-### Basic
+### Wrappers without arguments
 
-1. Identify the function you want to wrap
+Wrappers such as `trace()` and `once()` can be applied directly to functions without any other arguments.
+E.g `trace`
 
-   ```ts
-   function add(a: number, b: number) {
-     return a + b;
-   }
-   ```
+```ts
+import { trace } from "ts-wrappers";
 
-2. Create the `trace()` wrapper
+function add(a: number, b: number) {
+  return a + b;
+}
 
-   ```ts
-   import wrapper, { FUNC } from "@/";
+const tracedAdd = trace(add);
+//      ^? (a: number, b: number) => number
 
-   const trace = wrapper((next, ...args: any[]) => {
-     const tag = `${next[FUNC].name}(${args}) | duration`;
-     console.time(tag);
-     const result = next();
-     console.timeEnd(tag);
-     return result;
-   });
-   ```
+console.log(tracedAdd(4, 5));
+console.log(tracedAdd(3, 5));
+```
 
-3. Apply the wrapper
+**OUTPUT**
 
-   ```ts
-   const tracedAdd = trace(add);
-   //      ^? (a: number, b: number) => number
+```txt
+add(4,5) | duration: 0.114ms
+9
+add(10,12) | duration: 0.005ms
+22
+```
 
-   console.log(tracedAdd(4, 5));
-   console.log(tracedAdd(3, 5));
-   ```
+### Wrappers with arguments
 
-   **OUTPUT**
+Other wrappers such as `retry()`, `debounce()`, `memoize()`, etc. require some external arguments that inform the behavior of the wrapper. These arguments are provided in a "curried" manner.
 
-   ```txt
-   add(4,5) | duration: 0.114ms
-   9
-   add(10,12) | duration: 0.005ms
-   22
-   ```
+```ts
+import { memoize } from "ts-wrappers";
 
-### Complex (wrapper with extra arguments e.g memoization)
+let fib = function (n: number): number {
+  return n < 2 ? n : fib(n - 1) + fib(n - 2);
+};
+// A simple hash function
+const hashFn = (x: number) => x;
 
-For this example, we will create a memoize wrapper for fibonacci numbers. Take this function for example:
+// Redefining is super important here so it is memoized for recursive calls
+fib = memoize(hashFn)(fib);
 
-1. Identify the function you would like to memoize:
+// Applying trace to the function to see its performance
+const tFib = trace(fib);
 
-   ```ts
-   let fib = function (n: number): number {
-     return n < 2 ? n : fib(n - 1) + fib(n - 2);
-   };
-   ```
+console.log(tFib(10));
+console.log(tFib(10));
+```
 
-2. Create the `memoize()` function which takes a hash function, and an optional cache, and returns a wrapper that memoizes function calls
+**OUTPUT**
 
-   ```ts
-   import wrapper from "@/";
+```txt
+ fib(10) | duration: 0.369ms
+ 55
+ -----
+ fib(10) | duration: 0.016ms
+ 55
+```
 
-   export function memoize<
-     H extends (...args: any[]) => string | number | symbol
-   >(hash: H, cache = Object.create(null)) {
-     return wrapper((next, ...args: any[]) => {
-       const key = hash(...args);
-       if (!(key in cache)) {
-         cache[key] = next();
-       }
-       return cache[key] as ReturnType<typeof next>;
-     });
-   }
-   ```
+## Templates
 
-3. Now, apply the `memoize()` function to `fib`. (_We also apply `trace` from before so we can measure execution times_).
+You can also define your type-safe wrappers using the basic examples inside of `templates` directory.
+You can copy and modify the code to suite your needs.
 
-   > NB: Since this function is recursive, we will want to redefine the function so that all recursive calls are memoized.
+Heare are the available templates and what they allow you to do.
 
-   ```ts
-   // A simple hash function
-   const hash = (x: number) => x;
+| template                                                   | Type-safe | Transparent | Arguments? | Scopes |
+| :--------------------------------------------------------- | :-------: | :---------: | :--------: | :----: |
+| [basic](./templates/basic.ts)                              |    ✅     |     ✅      |     🚫     |   2    |
+| [basic (with `wrapper`)](./templates/wrapper/basic.ts)     |    ✅     |     ✅      |     🚫     |   1    |
+| [basic (with promises)](./templates/basic-promise.ts)      |    ✅     |     ✅      |     🚫     |   2    |
+| [complex](./templates/complex.ts)                          |    ✅     |     ✅      |     ✅     |   3    |
+| [complex (with `wrapper`)](./templates/wrapper/complex.ts) |    ✅     |     ✅      |     ✅     |   2    |
+| [complex (with promises)](./templates/complex-promise.ts)  |    ✅     |     ✅      |     ✅     |   3    |
 
-   // Redefining is super important here so it is memoized for recursive calls
-   fib = memoize(hash)(fib);
+**Key**
 
-   const tracedFib = trace(fib);
+- **Type-safe**: cannot apply a wrapper to function which does not match its expected args
+- **Transparent**: correctly infers the wrapped function type (both arguments and return type) when applied
+- **Arguments?**: whether or not the wrapper accepts extra arguments (other than the functions'), e.g `delay` in the `retry()` wrapper
+- **Promises**: for async wrappers, whether or not the wrapper returns a promise which resolves to the function's return value. e.g `retry()`, `debounce()` etc.
+- **Scopes**: how many levels of scope for defining variables. e.g the wrapper scope, wrapped function scope.
 
-   console.log(tracedFib(10));
-   console.log(tracedFib(10));
-   ```
+## Performance
 
-   **OUTPUT**
+The following tables, show a breakdown in performance between manually creating wrappers with the templates versus using the `wrapper` helper. They are both compared to the "base" version of executing the function directly.
 
-   ```txt
-    fib(10) | duration: 0.369ms
-    55
-    -----
-    fib(10) | duration: 0.016ms
-    55
-   ```
+The source-code for this performance evaluation can be found in [demos/benchmark.ts](./demos/benchmark.ts)
+
+**Execution Time (ms)**
+
+| kind      | duration /ms |
+| :-------- | :----------- |
+| base      | 0.00011918   |
+| manual    | 0.00013144   |
+| `wrapper` | 0.00014402   |
+
+**Execution Time Multiplier (x)**
+
+| kind      | multiplier /x |
+| :-------- | :------------ |
+| base      | 1             |
+| manual    | 1.10284852    |
+| `wrapper` | 1.2084684     |
+
+**Summary**: The manual approach to defining wrappers with templates is superior in performance to the `wrapper` helper.
+
+## Acknowledgements
+
+The following repositories were the seeds for, and helpful in building this out!
+
+- [rexfordessilfie/nextwrappers #19](https://github.com/rexfordessilfie/nextwrappers/issues/19)
+- [tournament-js/wrappers](https://github.com/tournament-js/wrappers)
