@@ -1,86 +1,162 @@
 import wrapper from "../src/wrapper";
 
+/**
+ * Time the execution of a function, check for an expected value and return its duration
+ */
 function time<F extends (...args: any[]) => any>(
   func: F,
   arr: number[],
-  expected: number
+  expected?: number
 ) {
   const t0 = performance.now();
   const result = func();
   const t1 = performance.now();
-  const dur = t1 - t0;
-  arr.push(dur);
+  const duration = t1 - t0;
+  arr.push(duration);
 
-  if (result !== expected) {
-    throw new Error("Bad result!");
+  if (expected !== undefined) {
+    if (result !== expected) {
+      console.error(
+        `Error evaluating function. Expected ${expected}, Received: ${result}`
+      );
+      throw new Error("Bad result!");
+    }
   }
-  return dur;
+
+  return duration;
 }
 
+/**
+ * Compute the average of numbers
+ */
 const avg = (arr: number[]) => {
   return arr.reduce((a, b) => a + b, 0) / arr.length;
 };
 
+/**
+ * Compute the relative percentage difference between two numbers
+ */
 const rpd = (a: number, b: number) => {
   return ((b - a) / a) * 100;
 };
 
+/**
+ * Compute the relative multiplier between two numbers
+ */
+const mult = (a: number, b: number) => {
+  return b / a;
+};
+
+/**
+ * Convert a number to fixed number of digits
+ */
 const toFixed = (num: number, digits: number) => {
   return Number(num.toFixed(digits));
 };
 
-function exec(x: number) {
-  return x * x;
-}
+/**
+ * Execute a function for number of iterations and return its average execution time
+ */
+const runForIterations = async (
+  iterations: number,
+  fn: Function,
+  args: any[],
+  expected?: any
+) => {
+  return new Promise<any>((resolve, reject) => {
+    try {
+      const arr: number[] = [];
+      for (let i = 0; i < iterations; i++) {
+        time(() => fn(...args), arr, expected);
+      }
+      resolve(avg(arr));
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
-function exec1(x: number) {
-  return x * x;
-}
+const run = async (
+  exec: Function,
+  execMan: Function,
+  execTs: Function,
+  args: any[]
+) => {
+  const WARMUP_ITERATIONS = 1_000_000;
+  const ITERATIONS = 1_000_000;
 
-function exec2(x: number) {
-  return x * x;
-}
-const tsWrapped = wrapper((fn, ...args: any[]) => {
+  let baselineDur = NaN,
+    manualDur = NaN,
+    tsWrapperDur = NaN;
+
+  let baselineRpd = NaN,
+    tsWrapperRpd = NaN,
+    manualRpd = NaN;
+
+  let baselineMult = NaN,
+    tsWrapperMult = NaN,
+    manualMult = NaN;
+
+  const expected = exec(...args);
+
+  await Promise.all([
+    runForIterations(WARMUP_ITERATIONS, exec, args, expected),
+    runForIterations(WARMUP_ITERATIONS, execMan, args, expected),
+    runForIterations(WARMUP_ITERATIONS, execTs, args, expected),
+  ]);
+
+  [baselineDur, manualDur, tsWrapperDur] = await Promise.all([
+    runForIterations(ITERATIONS, exec, args, expected),
+    runForIterations(ITERATIONS, execMan, args, expected),
+    runForIterations(ITERATIONS, execTs, args, expected),
+  ]);
+
+  baselineRpd = rpd(baselineDur, baselineDur);
+  tsWrapperRpd = rpd(baselineDur, tsWrapperDur);
+  manualRpd = rpd(baselineDur, manualDur);
+
+  baselineMult = mult(baselineDur, baselineDur);
+  tsWrapperMult = mult(baselineDur, tsWrapperDur);
+  manualMult = mult(baselineDur, manualDur);
+
+  console.table({
+    base: { "duration / ms": toFixed(baselineDur, 8) },
+    manual: { "duration / ms": toFixed(manualDur, 8) },
+    wrapper: { "duration / ms": toFixed(tsWrapperDur, 8) },
+  });
+
+  console.table({
+    base: { "multiplier / x": toFixed(baselineMult, 8) },
+    manual: { "multiplier / x": toFixed(manualMult, 8) },
+    wrapper: { "multiplier / x": toFixed(tsWrapperMult, 8) },
+  });
+
+  console.table({
+    base: { "change in duration / %": toFixed(baselineRpd, 8) },
+    manual: { "change in duration / %": toFixed(manualRpd, 8) },
+    wrapper: { "change in duration / %": toFixed(tsWrapperRpd, 8) },
+  });
+};
+
+// Prepare arguments for benchmarking
+const tsWrapper = wrapper((fn, ...args: any[]) => {
   return fn(...args);
 });
 
-const manWrapped = <FArgs extends any[], FReturn>(
-  func: (...args: FArgs) => FReturn
+export const manWrapper = <FArgs extends any[], FReturn>(
+  fn: (...args: FArgs) => FReturn
 ) => {
-  return (...args: Parameters<typeof func>) => func(...args);
+  return function newFn(...args: Parameters<typeof fn>) {
+    const result = fn(...args);
+    return result;
+  };
 };
 
-const execTs = tsWrapped(exec1);
-const execMan = manWrapped(exec2);
+const exec = (x: number) => {
+  return x * x;
+};
 
-const arr: number[] = [];
-const arrTs: number[] = [];
-const arrMan: number[] = [];
+const execWithTsWrapper = tsWrapper(exec);
+const execWithMan = manWrapper(exec);
 
-const expected = exec(5);
-
-for (let i = 0; i < 1_000_000; i++) {
-  time(() => exec(5), arr, expected);
-  // time(() => execTs(5), arrTs, expected);
-  // time(() => execMan(5), arrMan, expected);
-}
-
-const baseline = avg(arr);
-const tswrapper = avg(arrTs);
-const manual = avg(arrMan);
-
-console.table({
-  base: { "duration / ms": toFixed(baseline, 8) },
-  wrapper: { "duration / ms": toFixed(tswrapper, 8) },
-  manual: { "duration / ms": toFixed(manual, 8) },
-});
-
-const baselineRpd = rpd(baseline, baseline);
-const tswrappersRpd = rpd(baseline, tswrapper);
-const manualRpd = rpd(baseline, manual);
-
-console.table({
-  base: { "change in duration / %": toFixed(baselineRpd, 8) },
-  wrapper: { "change in duration / %": toFixed(tswrappersRpd, 8) },
-  manual: { "change in duration / %": toFixed(manualRpd, 8) },
-});
+run(exec, execWithMan, execWithTsWrapper, [5]);
