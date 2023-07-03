@@ -2,6 +2,16 @@
 
 Transparent, Type-safe wrappers for your Typescript functions.
 
+## Installation
+
+Install `ts-wrappers` to use the `wrapper` helper or copy and paste the utility wrappers to your project!
+
+```bash
+npm install ts-wrappers # Using npm
+pnpm add ts-wrappers # Using pnpm
+yarn add ts-wrappers # Using yarn
+```
+
 ## API
 
 - `wrapper`: a helper for conveniently defining function wrappers

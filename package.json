@@ -1,14 +1,22 @@
 {
   "name": "ts-wrappers",
-  "version": "1.0.0",
+  "version": "0.0.1-canary.0",
   "description": "Transparent, Type-safe wrappers for your Typescript functions",
   "main": "dist/index.js",
   "scripts": {
     "test": "ava",
     "build": "tsup",
-    "build:watch": "pnpm build --watch"
+    "build:watch": "pnpm build --watch",
+    "prepublishOnly": "pnpm build"
   },
-  "keywords": [],
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "wrapper",
+    "wrappers",
+    "typescript"
+  ],
   "ava": {
     "extensions": {
       "ts": "module"
@@ -18,13 +26,12 @@
     ]
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "ava": "^5.3.1",
     "tsd": "^0.28.1",
     "tsup": "^7.1.0",
     "tsx": "^3.12.7",
     "typescript": "^5.1.6"
-  },
-  "packageManager": "pnpm@7.25.1"
+  }
 }
