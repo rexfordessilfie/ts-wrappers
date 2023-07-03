@@ -14,8 +14,18 @@ yarn add ts-wrappers # Using yarn
 
 ## API
 
-- `wrapper`: a helper for conveniently defining function wrappers
-- `debounce()`, `memoize()`, `retry()`, `throttle()`, and other utility wrappers
+|                                                           | description                                             |
+| :-------------------------------------------------------- | :------------------------------------------------------ |
+| [`wrapper(cb)`](./src/wrapper.ts)                         | Utility helper for creating type-safe function wrappers |
+| [`als(storage, init)(fn)`](./src/common/als.ts)           | Execute a function within an AsyncLocalStorage context  |
+| [`debounce(wait, leading)(fn)`](./src/common/debounce.ts) | Debounce a function's invocation                        |
+| [`delay(wait)(fn)`](./src/common/delay.ts)                | Delay a function's invocation                           |
+| [`intercept(otherFn)(fn)`](./src/common/intercept.ts)     | Intercept a function with another one                   |
+| [`memoize(hashFn, cache)(fn)`](./src/common/memoize.ts)   | Memoize a function based on its arguments               |
+| [`once(fn)`](./src/common/once.ts)                        | Invoke a function only once in a program lifecycle      |
+| [`repeat(count)(fn)`](./src/common/repeat.ts)             | Repeat a function                                       |
+| [`throttle(wait)(fn)`](./src/common/throttle.ts)          | Throttle a function's invocation                        |
+| [`trace(fn)`](./src/common/trace.ts)                      | Log a function's arguments and duration                 |
 
 ## Usage
 
