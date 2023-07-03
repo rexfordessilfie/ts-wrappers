@@ -7,3 +7,4 @@ export * from "./repeat";
 export * from "./retry";
 export * from "./throttle";
 export * from "./trace";
+export * from "./als";
