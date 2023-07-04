@@ -1,10 +1,5 @@
 import { debounce } from "../src";
-
-async function sleep(time: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, time);
-  });
-}
+import { sleep } from "../src/sleep";
 
 export async function demo() {
   const debouncedLog = debounce(500, true)(console.log);

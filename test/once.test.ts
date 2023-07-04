@@ -14,6 +14,26 @@ test("maintains reference to this", async (t) => {
   t.is(store.val, 1);
 });
 
+test("maintains function properties", async (t) => {
+  let val = 0;
+
+  function incBy(this: any, num: number, _dummyArg?: any) {
+    val += num;
+    return num;
+  }
+
+  incBy.prototype.foo = "bar";
+
+  const onceIncBy = once(incBy);
+
+  onceIncBy(10);
+
+  t.is(val, 10);
+  t.is(onceIncBy.name, "incBy");
+  t.is(onceIncBy.length, 2);
+  t.is(onceIncBy.prototype.foo, "bar");
+});
+
 test("only executes once", async (t) => {
   let val = 0;
 

@@ -1,7 +1,7 @@
 export function throttle(delay: number) {
   return <FArgs extends any[], FReturn>(fn: (...args: FArgs) => FReturn) => {
     let wait = false;
-    return async function (...args: Parameters<typeof fn>) {
+    async function newFn(...args: Parameters<typeof fn>) {
       if (wait) {
         return;
       }
@@ -22,6 +22,15 @@ export function throttle(delay: number) {
       }
 
       return result;
-    };
+    }
+
+    // Copy properties to new function
+    Object.entries(Object.getOwnPropertyDescriptors(fn)).forEach(
+      ([prop, descriptor]) => {
+        Object.defineProperty(newFn, prop, descriptor);
+      }
+    );
+
+    return newFn;
   };
 }

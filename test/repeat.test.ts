@@ -14,6 +14,26 @@ test("maintains reference to this", async (t) => {
   t.is(data.val, 3);
 });
 
+test("maintains function properties", async (t) => {
+  let val = 0;
+
+  function incBy(this: any, num: number, _dummyArg?: any) {
+    val += num;
+    return num;
+  }
+
+  incBy.prototype.foo = "bar";
+
+  const repeatedIncBy = repeat(3)(incBy);
+
+  await repeatedIncBy(10);
+
+  t.is(val, 30);
+  t.is(repeatedIncBy.name, "incBy");
+  t.is(repeatedIncBy.length, 2);
+  t.is(repeatedIncBy.prototype.foo, "bar");
+});
+
 test("executes repeatedly", async (t) => {
   let currTime: number, prevTime: number;
 

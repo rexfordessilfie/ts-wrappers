@@ -20,6 +20,28 @@ test("maintains reference to this", async (t) => {
   t.is(intercepted, true);
 });
 
+test("maintains function properties", async (t) => {
+  let val = 0;
+
+  function exec(..._args: any[]) {}
+
+  function incBy(this: any, num: number, _dummyArg?: any) {
+    val += num;
+    return num;
+  }
+
+  incBy.prototype.foo = "bar";
+
+  const interceptedIncBy = intercept(exec)(incBy);
+
+  await interceptedIncBy(10);
+
+  t.is(val, 10);
+  t.is(interceptedIncBy.name, "incBy");
+  t.is(interceptedIncBy.length, 2);
+  t.is(interceptedIncBy.prototype.foo, "bar");
+});
+
 test("allows async interception with throw", async (t) => {
   let intercepted = false;
 

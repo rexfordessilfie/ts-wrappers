@@ -22,6 +22,26 @@ test("maintains reference to this", async (t) => {
   });
 });
 
+test("maintains function properties", async (t) => {
+  let val = 0;
+
+  function incBy(this: any, num: number, _dummyArg?: any) {
+    val += num;
+    return num;
+  }
+
+  incBy.prototype.foo = "bar";
+
+  const debouncedIncBy = debounce(0)(incBy);
+
+  await debouncedIncBy(10);
+
+  t.is(val, 10);
+  t.is(debouncedIncBy.name, "incBy");
+  t.is(debouncedIncBy.length, 2);
+  t.is(debouncedIncBy.prototype.foo, "bar");
+});
+
 test("debounces fast running operation", async (t) => {
   const durations = [50, 400, 100, 50, 600, 40];
 

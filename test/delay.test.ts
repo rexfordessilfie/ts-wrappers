@@ -22,8 +22,28 @@ test("maintains reference to this", async (t) => {
   });
 });
 
+test("maintains function properties", async (t) => {
+  let val = 0;
+
+  function incBy(this: any, num: number, _dummyArg?: any) {
+    val += num;
+    return num;
+  }
+
+  incBy.prototype.foo = "bar";
+
+  const delayedIncBy = delay(0)(incBy);
+
+  await delayedIncBy(10);
+
+  t.is(val, 10);
+  t.is(delayedIncBy.name, "incBy");
+  t.is(delayedIncBy.length, 2);
+  t.is(delayedIncBy.prototype.foo, "bar");
+});
+
 test("delays function invocation", async (t) => {
-  function inc() {
+  function inc(this: any) {
     this.val++;
   }
 

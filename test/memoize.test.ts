@@ -20,6 +20,26 @@ test("maintains reference to this", async (t) => {
   t.is(data.add(1), 2);
 });
 
+test("maintains function properties", async (t) => {
+  let val = 0;
+
+  function incBy(this: any, num: number, _dummyArg?: any) {
+    val += num;
+    return num;
+  }
+
+  incBy.prototype.foo = "bar";
+
+  const memoizedIncBy = memoize(hash)(incBy);
+
+  memoizedIncBy(10);
+
+  t.is(val, 10);
+  t.is(memoizedIncBy.name, "incBy");
+  t.is(memoizedIncBy.length, 2);
+  t.is(memoizedIncBy.prototype.foo, "bar");
+});
+
 test("populates cache after invocation", async (t) => {
   let cache: Record<string, any> = {};
 

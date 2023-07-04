@@ -20,6 +20,26 @@ test("maintains reference to this", async (t) => {
   });
 });
 
+test("maintains function properties", async (t) => {
+  let val = 0;
+
+  function incBy(this: any, num: number, _dummyArg?: any) {
+    val += num;
+    return num;
+  }
+
+  incBy.prototype.foo = "bar";
+
+  const throttledIncBy = throttle(10)(incBy);
+
+  await throttledIncBy(10);
+
+  t.is(val, 10);
+  t.is(throttledIncBy.name, "incBy");
+  t.is(throttledIncBy.length, 2);
+  t.is(throttledIncBy.prototype.foo, "bar");
+});
+
 test("throttles fast running operation", async (t) => {
   function inc(this: any) {
     return ++this.val;

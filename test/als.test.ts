@@ -25,6 +25,29 @@ test("maintains reference to this", async (t) => {
   t.is(data.incBy(2), 3);
 });
 
+test("maintains function properties", async (t) => {
+  let val = 0;
+
+  const init = (..._args: any[]) => -1;
+  const storage = new AsyncLocalStorage<number>();
+
+  function incBy(this: any, num: number, _dummyArg?: any) {
+    val += num;
+    return num;
+  }
+
+  incBy.prototype.foo = "bar";
+
+  const incByWithAls = als(storage, init)(incBy);
+
+  incByWithAls(10);
+
+  t.is(val, 10);
+  t.is(incByWithAls.name, "incBy");
+  t.is(incByWithAls.length, 2);
+  t.is(incByWithAls.prototype.foo, "bar");
+});
+
 test("executes function in async local context", (t) => {
   const init = (..._args: any[]) => -1;
   const storage = new AsyncLocalStorage<number>();

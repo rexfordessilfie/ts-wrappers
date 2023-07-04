@@ -14,6 +14,26 @@ test("maintains reference to this", async (t) => {
   t.is(data.val, 1);
 });
 
+test("maintains function properties", async (t) => {
+  let val = 0;
+
+  function incBy(this: any, num: number, _dummyArg?: any) {
+    val += num;
+    return num;
+  }
+
+  incBy.prototype.foo = "bar";
+
+  const retryIncBy = retry(1)(incBy);
+
+  await retryIncBy(10);
+
+  t.is(val, 10);
+  t.is(retryIncBy.name, "incBy");
+  t.is(retryIncBy.length, 2);
+  t.is(retryIncBy.prototype.foo, "bar");
+});
+
 test("executes when no errors", async (t) => {
   let val = 0;
 
