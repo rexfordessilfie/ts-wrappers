@@ -25,7 +25,7 @@ test("maintains reference to this", async (t) => {
 test("debounces fast running operation", async (t) => {
   const durations = [50, 400, 100, 50, 600, 40];
 
-  function inc() {
+  function inc(this: any) {
     this.val++;
   }
 
