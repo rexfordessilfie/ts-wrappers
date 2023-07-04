@@ -2,8 +2,13 @@ export default function wrapper<CArgs extends any[], CReturn>(
   cb: (fn: Fn, ...args: CArgs) => CReturn
 ) {
   return <FArgs extends CArgs, FReturn>(func: Func<FArgs, FReturn>) => {
-    return (...args: Parameters<typeof func>) => {
-      return cb(func as Parameters<typeof cb>[0], ...(args as any)) as Replace<
+    return function (...args: Parameters<typeof func>) {
+      return cb.call(
+        // @ts-ignore TS2683
+        this,
+        func as Parameters<typeof cb>[0],
+        ...(args as CArgs)
+      ) as Replace<
         CReturn,
         FnReturnType,
         ReturnType<typeof func>,

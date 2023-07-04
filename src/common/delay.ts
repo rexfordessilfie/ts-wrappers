@@ -1,10 +1,14 @@
 export function delay(wait: number) {
-  return <FArgs extends any[], FReturn>(fn: (...args: FArgs) => FReturn) =>
-    (...args: Parameters<typeof fn>) => {
+  return function <FArgs extends any[], FReturn>(
+    fn: (...args: FArgs) => FReturn
+  ) {
+    return function (...args: Parameters<typeof fn>) {
       return new Promise<ReturnType<typeof fn>>((resolve) => {
         setTimeout(() => {
-          resolve(fn(...args));
+          // @ts-ignore TS2683
+          resolve(fn.apply(this, args));
         }, wait);
       });
     };
+  };
 }
