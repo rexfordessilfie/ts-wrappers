@@ -7,6 +7,22 @@ test("has defulat export", (t) => {
   t.truthy(wrapper);
 });
 
+test("maintains reference to this", (t) => {
+  const through = wrapper(function (this: any, fn, ...args: any[]) {
+    t.is(this.val, 1); // Can access 'this' within the callback
+    return fn.apply(this, args);
+  });
+
+  const data = {
+    val: 1,
+    getVal: through(function (this: any) {
+      return this.val as number; // Can access 'this' inside the function
+    }),
+  };
+
+  t.is(data.getVal(), 1);
+});
+
 test("infers function types from wrapper", (t) => {
   const doubleBinNumOp = wrapper((fn, a: number, b: number) => {
     const next = () => fn(a, b);
