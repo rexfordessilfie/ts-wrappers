@@ -139,15 +139,17 @@ const run = async (
 };
 
 // Prepare arguments for benchmarking
-const tsWrapper = wrapper((fn, ...args: any[]) => {
-  return fn(...args);
+const tsWrapper = wrapper(function (fn, ...args: any[]) {
+  // @ts-ignore TS2683
+  return fn.call(this, ...args);
 });
 
 export const manWrapper = <FArgs extends any[], FReturn>(
   fn: (...args: FArgs) => FReturn
 ) => {
   return function newFn(...args: Parameters<typeof fn>) {
-    const result = fn(...args);
+    // @ts-ignore TS2683
+    const result = fn.call(this, ...args);
     return result;
   };
 };

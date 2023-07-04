@@ -2,10 +2,11 @@ export const once = <FArgs extends any[], FReturn>(
   fn: (...args: FArgs) => FReturn
 ) => {
   let executed = false;
-  return (...args: Parameters<typeof fn>) => {
+  return function (...args: Parameters<typeof fn>) {
     if (!executed) {
       executed = true;
-      return fn(...args);
+      // @ts-ignore TS2683
+      return fn.apply(this, args);
     }
   };
 };
