@@ -2,7 +2,7 @@ export function debounce(wait = 300, leading = false) {
   let timeout: any;
   return <FArgs extends any[], FReturn>(fn: (...args: FArgs) => FReturn) =>
     function (...args: Parameters<typeof fn>) {
-      return new Promise<ReturnType<typeof fn>>(
+      return new Promise<Awaited<ReturnType<typeof fn>>>(
         async (resolve: any, reject: any) => {
           clearTimeout(timeout);
 
