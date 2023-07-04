@@ -4,15 +4,15 @@ export function debounce(wait = 300, leading = false) {
     function (...args: Parameters<typeof fn>) {
       return new Promise<ReturnType<typeof fn>>(
         async (resolve: any, reject: any) => {
-          // @ts-ignore TS2683
-          const next = () => fn.apply(this, args);
           clearTimeout(timeout);
 
-          leading && !timeout && resolve(await next());
+          // @ts-ignore TS2683
+          leading && !timeout && resolve(await fn.apply(this, args));
           timeout = setTimeout(async () => {
             try {
               timeout = null;
-              !leading && resolve(next());
+              // @ts-ignore TS2683
+              !leading && resolve(await fn.apply(this, args));
             } catch (e) {
               reject(e);
             }
