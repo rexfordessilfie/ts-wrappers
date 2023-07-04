@@ -1,12 +1,13 @@
 export function throttle(delay: number) {
   return <FArgs extends any[], FReturn>(fn: (...args: FArgs) => FReturn) => {
     let wait = false;
-    return (...args: Parameters<typeof fn>) => {
+    return function (...args: Parameters<typeof fn>) {
       if (wait) {
         return;
       }
 
-      const result = fn(...args);
+      // @ts-ignore TS2683
+      const result = fn.apply(this, args);
       wait = true;
 
       setTimeout(() => {
