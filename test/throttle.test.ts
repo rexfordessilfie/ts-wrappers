@@ -1,11 +1,6 @@
 import test from "ava";
 import { throttle } from "../src";
-
-async function sleep(time: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, time);
-  });
-}
+import { sleep } from "../src/sleep";
 
 test("maintains reference to this", async (t) => {
   const store = {
