@@ -1,8 +1,8 @@
 export function debounce(wait = 300, leading = false) {
   let timeout: any;
-  return <FArgs extends any[], FReturn>(fn: (...args: FArgs) => FReturn) =>
-    function (...args: Parameters<typeof fn>) {
-      return new Promise<ReturnType<typeof fn>>(
+  return <FArgs extends any[], FReturn>(fn: (...args: FArgs) => FReturn) => {
+    function newFn(...args: Parameters<typeof fn>) {
+      return new Promise<Awaited<ReturnType<typeof fn>>>(
         async (resolve: any, reject: any) => {
           clearTimeout(timeout);
 
@@ -19,5 +19,14 @@ export function debounce(wait = 300, leading = false) {
           }, wait);
         }
       );
-    };
+    }
+
+    // Copy properties to new function
+    Object.entries(Object.getOwnPropertyDescriptors(fn)).forEach(
+      ([prop, descriptor]) => {
+        Object.defineProperty(newFn, prop, descriptor);
+      }
+    );
+    return newFn;
+  };
 }
