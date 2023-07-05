@@ -1,8 +1,16 @@
-export function complex(initial: number) {
+export function complex(_initial: number) {
   return <FArgs extends any[], FReturn>(fn: (...args: FArgs) => FReturn) => {
-    return function newFn(...args: Parameters<typeof fn>) {
-      const result = fn(...args);
-      return result;
-    };
+    function newFn(this: any, ...args: Parameters<typeof fn>) {
+      return fn.apply(this, args);
+    }
+
+    // Copy properties to new function
+    Object.entries(Object.getOwnPropertyDescriptors(fn)).forEach(
+      ([prop, descriptor]) => {
+        Object.defineProperty(newFn, prop, descriptor);
+      }
+    );
+
+    return newFn;
   };
 }

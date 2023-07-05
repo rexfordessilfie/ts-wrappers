@@ -101,17 +101,14 @@ Heare are the available templates and what they allow you to do.
 | :--------------------------------------------------------- | :-------: | :---------: | :--------: | :----: |
 | [basic](./templates/basic.ts)                              |    ✅     |     ✅      |     🚫     |   2    |
 | [basic (with `wrapper`)](./templates/wrapper/basic.ts)     |    ✅     |     ✅      |     🚫     |   1    |
-| [basic (with promises)](./templates/basic-promise.ts)      |    ✅     |     ✅      |     🚫     |   2    |
 | [complex](./templates/complex.ts)                          |    ✅     |     ✅      |     ✅     |   3    |
 | [complex (with `wrapper`)](./templates/wrapper/complex.ts) |    ✅     |     ✅      |     ✅     |   2    |
-| [complex (with promises)](./templates/complex-promise.ts)  |    ✅     |     ✅      |     ✅     |   3    |
 
 **Key**
 
 - **Type-safe**: cannot apply a wrapper to function which does not match its expected args
 - **Transparent**: correctly infers the wrapped function type (both arguments and return type) when applied
 - **Arguments?**: whether or not the wrapper accepts extra arguments (other than the functions'), e.g `delay` in the `retry()` wrapper
-- **Promises**: for async wrappers, whether or not the wrapper returns a promise which resolves to the function's return value. e.g `retry()`, `debounce()` etc.
 - **Scopes**: how many levels of scope for defining variables. e.g the wrapper scope, wrapped function scope.
 
 ## Performance
