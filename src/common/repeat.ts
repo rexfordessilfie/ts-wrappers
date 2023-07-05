@@ -17,6 +17,12 @@ export const repeat = (times: number, delay = 0) => {
       }
     }
 
+    // Copy properties to new function
+    Object.entries(Object.getOwnPropertyDescriptors(fn)).forEach(
+      ([prop, descriptor]) => {
+        Object.defineProperty(newFn, prop, descriptor);
+      }
+    );
     return newFn;
   };
 };
