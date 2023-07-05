@@ -37,6 +37,7 @@ test("rejects mismatched function argument type", (t) => {
   };
 
   // This should have an error since types do not match
+  // @ts-expect-error
   doubleBinNumOp(badFunc);
 
   t.truthy(true);
