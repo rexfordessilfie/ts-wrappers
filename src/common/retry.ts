@@ -1,25 +1,29 @@
-export const retry = (times: number, delay = 500) => {
-  return <FArgs extends any[], FReturn>(fn: (...args: FArgs) => FReturn) =>
-    function (...args: Parameters<typeof fn>) {
-      let attempts = 0;
-      return new Promise<ReturnType<typeof fn>>((resolve, reject) => {
-        const interval = setInterval(() => {
-          attempts += 1;
-          try {
-            // @ts-ignore TS2683
-            const result = fn.apply(this, args);
-            resolve(result);
+import { sleep } from "../sleep";
 
-            if (attempts <= times) {
-              clearInterval(interval);
-            }
-          } catch (e) {
-            if (attempts >= times) {
-              reject(e);
-              clearInterval(interval);
-            }
+export const retry = (times: number, delay = 0) => {
+  return <FArgs extends any[], FReturn>(fn: (...args: FArgs) => FReturn) => {
+    async function newFn(...args: Parameters<typeof fn>) {
+      for (let attempt = 1; attempt <= times; attempt++) {
+        try {
+          // @ts-ignore TS2683
+          const result = await fn.apply(this, args);
+          return result;
+        } catch (e) {
+          if (attempt >= times) {
+            throw e;
           }
-        }, delay);
-      });
-    };
+          await sleep(delay);
+        }
+      }
+    }
+
+    // Copy properties to new function
+    Object.entries(Object.getOwnPropertyDescriptors(fn)).forEach(
+      ([prop, descriptor]) => {
+        Object.defineProperty(newFn, prop, descriptor);
+      }
+    );
+
+    return newFn;
+  };
 };
