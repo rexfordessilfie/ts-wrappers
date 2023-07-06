@@ -115,7 +115,11 @@ Heare are the available templates and what they allow you to do.
 
 The following tables, show a breakdown in performance between manually creating wrappers with the templates versus using the `wrapper` helper. They are both compared to the "base" version of executing the function directly.
 
-The source-code for this performance evaluation can be found in [demos/benchmark.ts](./demos/benchmark.ts)
+The source-code for this performance evaluation can be found in [demos/benchmark.ts](./demos/benchmark.ts). It can be ran with
+
+```bash
+npx tsx demos/benchmark.ts
+```
 
 **Execution Time (ms)**
 
