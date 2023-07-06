@@ -27,6 +27,14 @@ yarn add ts-wrappers # Using yarn
 | [`throttle(wait)(fn)`](./src/common/throttle.ts)          | Throttle a function's invocation                        |
 | [`trace(fn)`](./src/common/trace.ts)                      | Log a function's arguments and duration                 |
 
+You can demo the pre-made common wrappers above by running the following:
+
+```bash
+npx tsx <name>.ts
+```
+
+> NB: replace `<name>` with the name of the wrapper you would like to demo. e.g als, debounce etc.
+
 ## Usage
 
 ### Wrappers without arguments
