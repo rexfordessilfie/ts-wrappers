@@ -1,11 +1,6 @@
 import test from "ava";
 import { delay } from "../src";
-
-async function sleep(time: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, time);
-  });
-}
+import { performance } from "perf_hooks";
 
 // IDEA: add prev wrapper that caches the result of the last function invocation in a `ref` object
 

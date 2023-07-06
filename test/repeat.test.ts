@@ -1,5 +1,6 @@
 import test from "ava";
 import { repeat } from "../src";
+import { performance } from "perf_hooks";
 
 test("maintains reference to this", async (t) => {
   const data = {
