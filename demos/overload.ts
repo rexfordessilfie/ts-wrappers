@@ -1,4 +1,4 @@
-export const once = <Fn extends (...args: any[]) => any>(fn: Fn) => {
+const once = <Fn extends (...args: any[]) => any>(fn: Fn) => {
   function newFn(this: any, ...args: any[]) {
     if (Math.random() > 0.5) {
       return true;
@@ -13,6 +13,7 @@ export const once = <Fn extends (...args: any[]) => any>(fn: Fn) => {
     }
   );
 
+  // Overriding type here preserves overloads but we lose the return type of newFn which could also return a boolean.
   return newFn as Fn;
 };
 
