@@ -14,7 +14,7 @@ yarn add ts-wrappers # Using yarn
 
 ## API
 
-|                                                           | description                                             |
+| API                                                       | description                                             |
 | :-------------------------------------------------------- | :------------------------------------------------------ |
 | [`wrapper(cb)`](./src/wrapper.ts)                         | Utility helper for creating type-safe function wrappers |
 | [`als(storage, init)(fn)`](./src/common/als.ts)           | Execute a function within an AsyncLocalStorage context  |
@@ -121,31 +121,13 @@ Heare are the available templates and what they allow you to do.
 
 ## Performance
 
-The following tables, show a breakdown in performance between manually creating wrappers with the templates versus using the `wrapper` helper. They are both compared to the "base" version of executing the function directly.
+Manually defining wrappers using the templates has better performance than using the `wrapper` helper. All common wrappers are defined manually for the best performance, however the `wrapper` helper aims to provide an easier approach to dealing with types.
 
-The source-code for this performance evaluation can be found in [demos/benchmark.ts](./demos/benchmark.ts). It can be ran with
+The source-code for the performance evaluation can be found in [demos/benchmark.ts](./demos/benchmark.ts), and can be ran with
 
 ```bash
 npx tsx demos/benchmark.ts
 ```
-
-**Execution Time (ms)**
-
-| kind      | duration /ms |
-| :-------- | :----------- |
-| base      | 0.00011918   |
-| manual    | 0.00013144   |
-| `wrapper` | 0.00014402   |
-
-**Execution Time Multiplier (x)**
-
-| kind      | multiplier /x |
-| :-------- | :------------ |
-| base      | 1             |
-| manual    | 1.10284852    |
-| `wrapper` | 1.2084684     |
-
-**Summary**: The manual approach to defining wrappers with templates is superior in performance to the `wrapper` helper.
 
 ## Acknowledgements
 
