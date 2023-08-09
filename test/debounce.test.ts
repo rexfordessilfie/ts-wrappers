@@ -42,7 +42,7 @@ test("maintains function properties", async (t) => {
   t.is(debouncedIncBy.prototype.foo, "bar");
 });
 
-test("debounces fast running operation", async (t) => {
+test("debounces with promise then", async (t) => {
   const durations = [50, 400, 100, 50, 600, 40];
 
   function inc(this: any) {
@@ -67,6 +67,51 @@ test("debounces fast running operation", async (t) => {
   }
 
   await last;
+
+  t.is(store.val, 3);
+});
+
+test("debounces with leading", async (t) => {
+  let val = 0;
+  function inc() {
+    val++;
+  }
+
+  const debouncedInc = debounce(100, { leading: true })(inc);
+
+  debouncedInc();
+  t.is(val, 1);
+  await sleep(200);
+  debouncedInc();
+  debouncedInc();
+  await sleep(200);
+  t.is(val, 2);
+});
+
+test("debounces keyed function", async (t) => {
+  function incBy(this: any, num = 1) {
+    this.val += num;
+  }
+
+  const store = {
+    val: 0,
+    debouncedIncBy: debounce(40, {
+      keyFn: (...args: any[]) => {
+        // using any here to let types of eventual function to passthrough
+        return args[0];
+      },
+    })(incBy),
+  };
+
+  store.debouncedIncBy(1);
+  await sleep(30); // Don't wait for long, then issue new operation to cancel first
+  store.debouncedIncBy(1);
+
+  store.debouncedIncBy(2); // Issue new operation but should not cancel other
+  await sleep(30);
+  store.debouncedIncBy(2); // Issue new operation before function can execute
+
+  await sleep(50); // Wait for remaining operations to complete
 
   t.is(store.val, 3);
 });

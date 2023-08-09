@@ -7,7 +7,7 @@ async function sleep(time: number) {
 }
 
 export async function demo() {
-  const debouncedLog = debounce(500, true)(console.log);
+  const debouncedLog = debounce(500, { leading: true })(console.log);
 
   // BEGIN
   debouncedLog("Hey there!");
