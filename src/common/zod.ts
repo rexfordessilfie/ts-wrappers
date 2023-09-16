@@ -25,7 +25,7 @@ export function validated<
       );
     }
 
-    function newFn(...args: FArgs): FReturn {
+    function newFn(...args: Parameters<Fn>): FReturn {
       const validateCount = Math.min(argSchemas.length, args.length);
 
       const validateArgs = args.slice(0, validateCount);
@@ -52,6 +52,6 @@ export function validated<
       },
     );
 
-    return newFn as Fn;
+    return newFn;
   };
 }
