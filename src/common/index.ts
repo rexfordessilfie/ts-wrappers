@@ -8,3 +8,4 @@ export * from "./retry";
 export * from "./throttle";
 export * from "./trace";
 export * from "./als";
+export * from "./zod";

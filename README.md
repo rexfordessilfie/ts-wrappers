@@ -14,18 +14,19 @@ yarn add ts-wrappers # Using yarn
 
 ## API
 
-| API                                                       | description                                             |
-| :-------------------------------------------------------- | :------------------------------------------------------ |
-| [`wrapper(cb)`](./src/wrapper.ts)                         | Utility helper for creating type-safe function wrappers |
-| [`als(storage, init)(fn)`](./src/common/als.ts)           | Execute a function within an AsyncLocalStorage context  |
-| [`debounce(wait, leading)(fn)`](./src/common/debounce.ts) | Debounce a function's invocation                        |
-| [`delay(wait)(fn)`](./src/common/delay.ts)                | Delay a function's invocation                           |
-| [`intercept(otherFn)(fn)`](./src/common/intercept.ts)     | Intercept a function with another one                   |
-| [`memoize(hashFn, cache)(fn)`](./src/common/memoize.ts)   | Memoize a function based on its arguments               |
-| [`once(fn)`](./src/common/once.ts)                        | Invoke a function only once in a program lifecycle      |
-| [`repeat(count)(fn)`](./src/common/repeat.ts)             | Repeat a function                                       |
-| [`throttle(wait)(fn)`](./src/common/throttle.ts)          | Throttle a function's invocation                        |
-| [`trace(fn)`](./src/common/trace.ts)                      | Log a function's arguments and duration                 |
+| API                                                              | description                                             |
+| :--------------------------------------------------------------- | :------------------------------------------------------ |
+| [`wrapper(cb)`](./src/wrapper.ts)                                | Utility helper for creating type-safe function wrappers |
+| [`als(storage, init)(fn)`](./src/common/als.ts)                  | Execute a function within an AsyncLocalStorage context  |
+| [`debounce(wait, leading)(fn)`](./src/common/debounce.ts)        | Debounce a function's invocation                        |
+| [`delay(wait)(fn)`](./src/common/delay.ts)                       | Delay a function's invocation                           |
+| [`intercept(otherFn)(fn)`](./src/common/intercept.ts)            | Intercept a function with another one                   |
+| [`memoize(hashFn, cache)(fn)`](./src/common/memoize.ts)          | Memoize a function based on its arguments               |
+| [`once(fn)`](./src/common/once.ts)                               | Invoke a function only once in a program lifecycle      |
+| [`repeat(count)(fn)`](./src/common/repeat.ts)                    | Repeat a function                                       |
+| [`throttle(wait)(fn)`](./src/common/throttle.ts)                 | Throttle a function's invocation                        |
+| [`trace(fn)`](./src/common/trace.ts)                             | Log a function's arguments and duration                 |
+| [`validated(argSchemas, returnSchema)(fn)`](./src/common/zod.ts) | Validate a function call and return with zod            |
 
 You can demo the pre-made common wrappers above by running the following:
 
