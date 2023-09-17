@@ -2,16 +2,32 @@ import { z } from "zod";
 
 type ZodTupleArg = [] | [z.Schema, ...z.Schema[]];
 
+/**
+ * Take as many as possible from Base until empty, discarding items in Source.
+ * If Base exhausted, then spread Source.
+ */
+type TakeUntil<Base extends any[], Source extends any[]> = Base extends [
+  infer A,
+  ...infer RestBase,
+]
+  ? Source extends [infer _, ...infer RestSource]
+    ? [A, ...TakeUntil<RestBase, RestSource>]
+    : []
+  : [...Source];
+
+type Test = TakeUntil<[1], [4, 5, 6]>;
+
 export function validated<
   ArgsSchema extends ZodTupleArg,
   ReturnSchema extends z.Schema | undefined = undefined,
 >(argSchemas: ArgsSchema, returnSchema?: ReturnSchema) {
   return <
-    FArgs extends z.input<z.ZodTuple<ArgsSchema>>,
-    FReturn extends ReturnSchema extends z.Schema
+    ArgsIn extends z.input<z.ZodTuple<ArgsSchema>>,
+    ArgsOut extends z.infer<z.ZodTuple<ArgsSchema>>,
+    Return extends ReturnSchema extends z.Schema
       ? z.infer<ReturnSchema>
       : unknown,
-    Fn extends (...args: FArgs) => FReturn,
+    Fn extends (...args: ArgsOut) => Return,
   >(
     fn: Fn,
   ) => {
@@ -25,7 +41,7 @@ export function validated<
       );
     }
 
-    function newFn(...args: Parameters<Fn>): FReturn {
+    function newFn(...args: TakeUntil<ArgsIn, ArgsOut>): Return {
       const validateCount = Math.min(argSchemas.length, args.length);
 
       const validateArgs = args.slice(0, validateCount);
