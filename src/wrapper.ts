@@ -45,17 +45,17 @@ type Spreadable<T> = T extends any[] ? T : never;
 
 type Replace<Source, A, B, Sentinel = never> = Source extends Sentinel
   ? Omit<Source, keyof Sentinel> extends infer T
-    ? Replace<LeftIfNotEqual<T, {}>, A, B, Sentinel> extends infer U
-      ? U | B
-      : never // Dummy ternary just so we can get an alias T
-    : never // Dummy ternary just so we can get an alias U
+  ? Replace<LeftIfNotEqual<T, {}>, A, B, Sentinel> extends infer U
+  ? U | B
+  : never // Dummy ternary just so we can get an alias T
+  : never // Dummy ternary just so we can get an alias U
   : Source extends Promise<infer T>
   ? Promise<Replace<T, A, B, Sentinel>>
   : Source extends [infer AItem, ...infer ARest]
   ? [
-      Replace<AItem, A, B, Sentinel>,
-      ...Spreadable<Replace<ARest, A, B, Sentinel>>
-    ]
+    Replace<AItem, A, B, Sentinel>,
+    ...Spreadable<Replace<ARest, A, B, Sentinel>>
+  ]
   : Source extends Record<string | number | symbol, any>
   ? { [K in keyof Source]: Replace<Source[K], A, B, Sentinel> }
   : Source extends A
