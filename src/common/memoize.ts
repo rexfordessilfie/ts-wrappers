@@ -1,13 +1,15 @@
-export function memoize<H extends (...args: any[]) => any>(
+import { Any } from "src/common/types";
+
+export function memoize<H extends Any.Function>(
   hash: H,
   cache = Object.create(null)
-) {
-  return <FArgs extends any[], FReturn>(fn: (...args: FArgs) => FReturn) => {
+): <Fn extends Any.Function>(fn: Fn) => Fn {
+  return (fn) => {
     function newFn(...args: Parameters<typeof fn>) {
-      // @ts-ignore TS2683
+      // @ts-expect-error TS2683
       const key = hash.apply(this, args);
       if (!(key in cache)) {
-        // @ts-ignore TS2683
+        // @ts-expect-error TS2683
         cache[key] = fn.apply(this, args);
       }
       return cache[key] as ReturnType<typeof fn>;
@@ -20,6 +22,6 @@ export function memoize<H extends (...args: any[]) => any>(
       }
     );
 
-    return newFn;
+    return newFn as never;
   };
 }
