@@ -1,6 +1,6 @@
 import type { Any } from "src/common/types";
 
-export const trace = <Fn extends Any.Function>(fn: Fn): Fn => {
+export const trace = <Fn extends Any.Function>(fn: Fn) => {
   function newFn(...args: Parameters<Fn>) {
     const tag = `${fn.name}(${args}) | duration`;
     console.time(tag);
@@ -17,5 +17,5 @@ export const trace = <Fn extends Any.Function>(fn: Fn): Fn => {
     }
   );
 
-  return newFn as never;
+  return newFn as Fn;
 };
