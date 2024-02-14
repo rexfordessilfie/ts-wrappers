@@ -1,10 +1,10 @@
-export const trace = <FArgs extends any[], FReturn>(
-  fn: (...args: FArgs) => FReturn
-) => {
-  function newFn(...args: Parameters<typeof fn>) {
+import type { Any } from "src/common/types";
+
+export const trace = <Fn extends Any.Function>(fn: Fn) => {
+  function newFn(...args: Parameters<Fn>) {
     const tag = `${fn.name}(${args}) | duration`;
     console.time(tag);
-    // @ts-ignore TS2683
+    // @ts-expect-error TS2683
     const result = fn.apply(this, args);
     console.timeEnd(tag);
     return result;
@@ -17,5 +17,5 @@ export const trace = <FArgs extends any[], FReturn>(
     }
   );
 
-  return newFn;
+  return newFn as Fn;
 };

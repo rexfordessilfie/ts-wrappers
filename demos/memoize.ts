@@ -19,4 +19,29 @@ export function demo() {
   console.log(tracedFib(10));
 }
 
+// Demo with overloaded functions
+
+function myFn(a: boolean): string | number;
+function myFn<T, U>(a: T, b: U): T | U;
+
+function myFn(...args: unknown[]) {
+  if (!Array.isArray(args)) {
+    throw new Error("Invalid arguments");
+  }
+
+  if (typeof args[0] === "boolean") {
+    return "hello";
+  }
+
+  return args[0];
+}
+
+export function demo2() {
+  console.log("demo2");
+  const memoizedMyFn = memoize((...args: any[]) => args.slice().join())(myFn);
+  console.log(memoizedMyFn(5, 6));
+  console.log(memoizedMyFn(false));
+}
+
 demo();
+demo2();
