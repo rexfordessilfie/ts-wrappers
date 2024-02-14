@@ -18,9 +18,9 @@
     "typescript"
   ],
   "ava": {
-    "extensions": {
-      "ts": "module"
-    },
+    "extensions": [
+      "ts"
+    ],
     "nodeArguments": [
       "--import=tsx"
     ]
