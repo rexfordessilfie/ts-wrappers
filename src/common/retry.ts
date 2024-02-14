@@ -5,7 +5,7 @@ import { Any } from "./types";
  *
  * Source: https://github.com/microsoft/TypeScript/blob/db3d54ffbc0a805fbdd5104c5a5137d7ca84420a/src/compiler/factory/emitHelpers.ts#L1458
  * */
-export class SuppressedError extends Error {
+class SuppressedError extends Error {
   constructor(error: any, suppressed: any, message: string) {
     super(message);
     this.error = error;
@@ -15,6 +15,10 @@ export class SuppressedError extends Error {
   name = "SuppressedError";
   error: any;
   suppressed: any;
+}
+
+export class RetryError extends SuppressedError {
+  name = "RetryError";
 }
 
 /**
@@ -37,7 +41,7 @@ export const retry = (times: number, delay = 0) => {
           return result;
         } catch (e) {
           ctx.error = ctx.hasError
-            ? new SuppressedError(
+            ? new RetryError(
                 e,
                 ctx.error,
                 `An error was suppressed during retry attempt ${attempt}`

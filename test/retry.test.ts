@@ -1,5 +1,5 @@
 import test from "ava";
-import { SuppressedError, retry } from "../src";
+import { RetryError, retry } from "../src";
 import { performance } from "perf_hooks";
 
 test("maintains reference to this", async (t) => {
@@ -24,7 +24,7 @@ test("tracks retry errors", async (t) => {
   };
 
   const err = await t.throwsAsync(data.retryedInc.bind(data), {
-    instanceOf: SuppressedError,
+    instanceOf: RetryError,
   });
 
   t.is(err?.message, "An error was suppressed during retry attempt 3");
