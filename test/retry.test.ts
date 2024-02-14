@@ -1,5 +1,5 @@
 import test from "ava";
-import { RetryError, retry } from "../src";
+import { RetryError, delayStrategy, retry } from "../src";
 import { performance } from "perf_hooks";
 
 test("maintains reference to this", async (t) => {
@@ -156,4 +156,32 @@ test("retries and fails", async (t) => {
 
   t.is(val, 0);
   t.is(callCount, 3);
+});
+
+test("exponential delay strategy", async (t) => {
+  const fn = delayStrategy.exponential();
+  t.true(fn(0) >= 1 * 1000); // More than 1 second
+  t.true(fn(1) >= 2 * 1000); // More than 2 seconds
+  t.true(fn(2) >= 4 * 1000); // More than 4 seconds
+  t.true(fn(3) >= 8 * 1000); // More than 8 seconds
+});
+
+test("exponential delay strategy with maximum backoff", async (t) => {
+  const fn = delayStrategy.exponential(2, 4000);
+  t.true(fn(0) >= 1 * 1000); // More than 1 second
+  t.true(fn(1) >= 2 * 1000); // More than 2 seconds
+  t.true(fn(2) >= 4 * 1000); // More than 4 seconds
+  t.true(fn(3) <= 5 * 1000); // Less than 5 seconds
+  t.true(fn(4) <= 5 * 1000); // Less than 5 seconds
+  t.true(fn(5) <= 5 * 1000); // Less than 5 seconds
+});
+
+test("exponential delay strategy with no randomization/noise", async (t) => {
+  const fn = delayStrategy.exponential(2, 4000, 0);
+  t.true(fn(0) == 1 * 1000); // More than 1 second
+  t.true(fn(1) == 2 * 1000); // More than 2 seconds
+  t.true(fn(2) == 4 * 1000); // More than 4 seconds
+  t.true(fn(3) == 4 * 1000); // Equal to 4 seconds
+  t.true(fn(4) == 4 * 1000); // Equal to 4 seconds
+  t.true(fn(5) == 4 * 1000); // Equal to 4 seconds
 });
