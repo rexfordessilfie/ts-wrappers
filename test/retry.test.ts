@@ -1,11 +1,11 @@
 import test from "ava";
-import { retry } from "../src";
+import { SuppressedError, retry } from "../src";
 import { performance } from "perf_hooks";
 
 test("maintains reference to this", async (t) => {
   const data = {
     val: 0,
-    retryedInc: retry(3)(function (this: any) {
+    retryedInc: retry(3)(async function (this: any) {
       return ++this.val;
     }),
   };
@@ -15,15 +15,52 @@ test("maintains reference to this", async (t) => {
   t.is(data.val, 1);
 });
 
+test("tracks retry errors", async (t) => {
+  const data = {
+    attempt: 0,
+    retryedInc: retry(3)(async function (this: any) {
+      throw new Error(`attempt:${++this.attempt}`);
+    }),
+  };
+
+  const err = await t.throwsAsync(data.retryedInc.bind(data), {
+    instanceOf: SuppressedError,
+  });
+
+  t.is(err?.message, "An error was suppressed during retry attempt 3");
+  t.is(err?.error.message, "attempt:3");
+
+  t.is(
+    err?.suppressed.message,
+    "An error was suppressed during retry attempt 2"
+  );
+  t.is(err?.suppressed.error.message, "attempt:2");
+
+  t.is(err?.suppressed.suppressed.message, "attempt:1");
+});
+
+test("tracks single retry error", async (t) => {
+  const data = {
+    attempt: 0,
+    retryedInc: retry(1)(async function (this: any) {
+      throw new Error(`attempt:${++this.attempt}`);
+    }),
+  };
+
+  const err = await t.throwsAsync(data.retryedInc.bind(data), {
+    instanceOf: Error,
+  });
+
+  t.is(err?.message, "attempt:1");
+});
+
 test("maintains function properties", async (t) => {
   let val = 0;
 
-  function incBy(this: any, num: number, _dummyArg?: any) {
+  async function incBy(this: any, num: number, _dummyArg?: any) {
     val += num;
     return num;
   }
-
-  incBy.prototype.foo = "bar";
 
   const retryIncBy = retry(1)(incBy);
 
@@ -32,13 +69,12 @@ test("maintains function properties", async (t) => {
   t.is(val, 10);
   t.is(retryIncBy.name, "incBy");
   t.is(retryIncBy.length, 2);
-  t.is(retryIncBy.prototype.foo, "bar");
 });
 
 test("executes when no errors", async (t) => {
   let val = 0;
 
-  const retryedInc = retry(3)(() => {
+  const retryedInc = retry(3)(async () => {
     return ++val;
   });
 
