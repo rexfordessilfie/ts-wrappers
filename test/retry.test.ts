@@ -92,7 +92,7 @@ test("retries with delay", async (t) => {
   const retryedInc = retry(
     RETRY_AMOUNT,
     DELAY
-  )(() => {
+  )(async () => {
     [currTime, prevTime] = [performance.now(), currTime];
 
     if (prevTime) {
@@ -117,7 +117,7 @@ test("retries and succeeds", async (t) => {
   const retryedInc = retry(
     RETRY_AMOUNT,
     DELAY
-  )(() => {
+  )(async () => {
     callCount += 1;
 
     // Only succeed on final retry
@@ -141,7 +141,7 @@ test("retries and fails", async (t) => {
 
   const RETRY_AMOUNT = 3;
 
-  const retryedInc = retry(RETRY_AMOUNT)(() => {
+  const retryedInc = retry(RETRY_AMOUNT)(async () => {
     callCount += 1;
 
     // Only succeed on final retry
