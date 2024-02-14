@@ -17,7 +17,7 @@ test("maintains reference to this", async (t) => {
     incBy: als(
       storage,
       init
-    )(function (this: any) {
+    )(function (this: any, ..._args: any[]) {
       return this.val + x();
     }),
   };
