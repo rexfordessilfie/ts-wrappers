@@ -4,8 +4,8 @@ import { AsyncLocalStorage } from "node:async_hooks";
 export function als<T, IArgs extends any[]>(
   storage: AsyncLocalStorage<T>,
   init: (...args: IArgs) => T
-): <Fn extends Any.Function>(fn: Fn) => Fn {
-  return function (fn) {
+) {
+  return function <Fn extends Any.Function>(fn: Fn) {
     function newFn(...args: Parameters<typeof fn>) {
       // @ts-expect-error TS2683
       const result = storage.run(init(...args), fn.bind(this), ...args);
@@ -19,6 +19,6 @@ export function als<T, IArgs extends any[]>(
       }
     );
 
-    return newFn as never;
+    return newFn as Fn;
   };
 }
