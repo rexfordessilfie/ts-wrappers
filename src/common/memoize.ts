@@ -3,8 +3,8 @@ import { Any } from "src/common/types";
 export function memoize<H extends Any.Function>(
   hash: H,
   cache = Object.create(null)
-): <Fn extends Any.Function>(fn: Fn) => Fn {
-  return (fn) => {
+) {
+  return <Fn extends Any.Function>(fn: Fn) => {
     function newFn(...args: Parameters<typeof fn>) {
       // @ts-expect-error TS2683
       const key = hash.apply(this, args);
@@ -22,6 +22,6 @@ export function memoize<H extends Any.Function>(
       }
     );
 
-    return newFn as never;
+    return newFn as Fn;
   };
 }
