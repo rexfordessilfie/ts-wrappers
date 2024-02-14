@@ -22,7 +22,7 @@
       "ts": "module"
     },
     "nodeArguments": [
-      "--loader=tsx"
+      "--import=tsx"
     ]
   },
   "author": "",
