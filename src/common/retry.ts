@@ -56,7 +56,7 @@ export const retry = (times: number, delay: RetryDelay = 0) => {
             throw ctx.error;
           }
 
-          await sleep(typeof delay === "number" ? delay : delay(attempt - 1));
+          await sleep(typeof delay === "function" ? delay(attempt - 1) : delay);
         }
       }
     }
