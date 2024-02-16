@@ -5,13 +5,12 @@ export function demo() {
     return Math.ceil(Math.random() * (max + 1));
   }
 
-  async function log(...args: Parameters<typeof console.log>) {
+  async function log(...args: any[]) {
     if (randInt(3) < 3 / 2) {
       // Fail 50% of the time
       throw new Error("Log failed!");
     }
-
-    return console.log(...args);
+    console.log(...args);
   }
 
   const logWithRetry = trace(retry(3)(log));
@@ -23,14 +22,13 @@ export function demoDelayStrategy() {
   const MAX_ATTEMPTS = 2;
   let attempt = 1;
 
-  async function buggyLog(...args: Parameters<typeof console.log>) {
+  const buggyLog = async (...args: any[]) => {
     if (attempt < MAX_ATTEMPTS) {
-      // Fail 50% of the time
       throw new Error(`Log failed! Attempt:${attempt++}`);
     }
     console.log(...args);
     return args.length;
-  }
+  };
 
   const buggyLogWithRetry = trace(
     retry(MAX_ATTEMPTS, delayStrategy.exponential())(buggyLog)
@@ -38,7 +36,7 @@ export function demoDelayStrategy() {
 
   buggyLogWithRetry("Hi from retry (strategy)!")
     .then((r) => {
-      console.log("result:", r);
+      console.log("args.length:", r);
     })
     .catch((e) => console.log(e));
 }
