@@ -21,13 +21,15 @@ export class RetryError extends SuppressedError {
   name = "RetryError";
 }
 
+type RetryDelay = number | ((attempt: number) => number);
+
 /**
  * Retries a function with the given delay.
  *
  * Suppresses errors that occur and throws a suppressed error at the end or
  * returns the result when it succeeds.
  * */
-export const retry = (times: number, delay = 0) => {
+export const retry = (times: number, delay: RetryDelay = 0) => {
   return function <Fn extends Any.AsyncFunction>(fn: Fn) {
     async function newFn(this: any, ...args: Parameters<Fn>) {
       const ctx: { error?: any; hasError: boolean } = {
@@ -54,7 +56,7 @@ export const retry = (times: number, delay = 0) => {
             throw ctx.error;
           }
 
-          await sleep(delay);
+          await sleep(typeof delay === "function" ? delay(attempt - 1) : delay);
         }
       }
     }
@@ -68,4 +70,16 @@ export const retry = (times: number, delay = 0) => {
 
     return newFn as Fn;
   };
+};
+
+export const delayStrategy = {
+  /** Source: https://cloud.google.com/memorystore/docs/redis/exponential-backoff */
+  exponential:
+    (base = 2, maxBackoff = 32 * 1000, maxNoise = 1000) =>
+    (n: number) =>
+      Math.min(base ** n * 1000 + Math.random() * maxNoise, maxBackoff),
+  linear:
+    (gradient = 1, intercept = 0) =>
+    (n: number) =>
+      gradient * n * 1000 + intercept,
 };

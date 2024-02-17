@@ -32,3 +32,38 @@ test("maintains function properties", async (t) => {
   t.is(tracedIncBy.length, 2);
   t.is(tracedIncBy.prototype.foo, "bar");
 });
+
+test("returns correct value for sync functions", async (t) => {
+  function inc(x: number) {
+    return x + 1;
+  }
+
+  const tracedInc = trace(inc);
+
+  t.is(tracedInc(2), 3);
+});
+
+test("returns correct value for async functions", async (t) => {
+  async function inc(x: number) {
+    return new Promise<number>((resolve) => {
+      setTimeout(() => {
+        resolve(x + 1);
+      }, 1000);
+    });
+  }
+
+  const tracedInc = trace(inc);
+
+  // with await
+  t.is(await tracedInc(2), 3);
+
+  // with chaining
+  await tracedInc(2)
+    .then((x) => {
+      t.is(x, 3);
+      return inc(x);
+    })
+    .then((x) => {
+      t.is(x, 4);
+    });
+});

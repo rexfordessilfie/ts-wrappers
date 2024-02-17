@@ -1,4 +1,4 @@
-import type { Any } from "src/common/types";
+import type { Any } from "./types";
 
 export const trace = <Fn extends Any.Function>(fn: Fn) => {
   function newFn(...args: Parameters<Fn>) {
@@ -6,8 +6,18 @@ export const trace = <Fn extends Any.Function>(fn: Fn) => {
     console.time(tag);
     // @ts-expect-error TS2683
     const result = fn.apply(this, args);
-    console.timeEnd(tag);
-    return result;
+
+    // non-promises
+    if (!result.then) {
+      console.timeEnd(tag);
+      return result;
+    }
+
+    // promises
+    return result.then((r: unknown) => {
+      console.timeEnd(tag);
+      return r;
+    });
   }
 
   // Copy properties to new function
