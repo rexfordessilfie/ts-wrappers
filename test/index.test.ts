@@ -9,7 +9,7 @@ test("has default export", (t) => {
 
 test("infers function types from wrapper", (t) => {
   const doubleBinNumOp = wrapper((fn, a: number, b: number) => {
-    const next = () => fn(a, b);
+    const next = () => fn<number>(a, b);
     next();
     return next();
   });
@@ -62,6 +62,9 @@ test("allows function args to extend wrapper args", (t) => {
 });
 
 test("infers wrapper return type when applied", (t) => {
+  const greet = () => "yo" as "yo";
+  type GreetReturn = ReturnType<typeof greet>;
+
   const withRandom = wrapper((fn, ...args: any[]) => {
     const rand = Math.random();
 
@@ -73,10 +76,8 @@ test("infers wrapper return type when applied", (t) => {
       return "hello";
     }
 
-    return fn(...args);
+    return fn<GreetReturn>(...args);
   });
-
-  const greet = () => "yo" as "yo";
 
   const greetRandomized = withRandom(greet);
 
@@ -127,7 +128,7 @@ test("can type the fn return in wrapper definition", (t) => {
 
 test("can invoke internal function", (t) => {
   const negateUnaryNumericOp = wrapper((fn, num: number) => {
-    return fn(-num);
+    return fn<number>(-num);
   });
 
   const double = (num: number) => 2 * num;

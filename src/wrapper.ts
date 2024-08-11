@@ -1,5 +1,5 @@
 export default function wrapper<CArgs extends any[], CReturn>(
-  cb: (fn: Fn, ...args: CArgs) => CReturn
+  cb: (fn: Fn<UnspecifiedReturnType, CArgs>, ...args: CArgs) => CReturn
 ) {
   return <FArgs extends CArgs, FReturn>(func: Func<FArgs, FReturn>) => {
     return function (...args: Parameters<typeof func>) {
@@ -8,54 +8,24 @@ export default function wrapper<CArgs extends any[], CReturn>(
         this,
         func as Parameters<typeof cb>[0],
         ...(args as CArgs)
-      ) as Replace<
-        CReturn,
-        FnReturnType,
-        ReturnType<typeof func>,
-        FnReturnType
-      >;
+      );
     };
   };
 }
 
-declare const brand: unique symbol;
+declare const return_type: unique symbol;
 
-type Brand<T, TBrand extends string> = T & {
-  [brand]: TBrand;
+type BrandedReturnType<T, TBrand extends string> = T & {
+  [return_type]: TBrand;
 };
 
 export type Func<Args extends any[], Return> = (...args: Args) => Return;
-type FnReturnBrand = "__FUNC_RETURN__";
-type FnReturnType = Brand<{}, FnReturnBrand>;
+type Unspecified = "unspecified";
+type UnspecifiedReturnType = BrandedReturnType<{}, Unspecified>;
 
-type ApplyBrand<T, TBrand extends string> = T extends TBrand
-  ? T
-  : Brand<T, TBrand>;
-
-type Fn<ReturnType = FnReturnType> = <
-  T = ReturnType,
-  Args extends any[] = any[]
+type Fn<ReturnType = UnspecifiedReturnType, ArgsType extends any[] = any[]> = <
+  Return = ReturnType,
+  Args extends any[] = ArgsType
 >(
   ...args: Args
-) => ApplyBrand<T, FnReturnBrand>;
-
-type Spreadable<T> = T extends any[] ? T : never;
-
-type Replace<Source, A, B, Sentinel = never> = Source extends infer T & Sentinel
-  ? Replace<T, A, B, Sentinel>
-  : Source extends Promise<infer T>
-  ? Promise<Awaited<Replace<T, A, B, Sentinel>>>
-  : Source extends [infer AItem, ...infer ARest]
-  ? [
-      Replace<AItem, A, B, Sentinel>,
-      ...Spreadable<Replace<ARest, A, B, Sentinel>>
-    ]
-  : Source extends (...args: infer P) => infer R
-  ? (
-      ...args: Spreadable<Replace<P, A, B, Sentinel>>
-    ) => Replace<R, A, B, Sentinel>
-  : Source extends Record<string | number | symbol, any>
-  ? { [K in keyof Source]: Replace<Source[K], A, B, Sentinel> }
-  : Source extends A
-  ? Exclude<Source, A> & B
-  : Source;
+) => Return;
