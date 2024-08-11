@@ -39,16 +39,10 @@ type Fn<ReturnType = FnReturnType> = <
   ...args: Args
 ) => ApplyBrand<T, FnReturnBrand>;
 
-type IsEqual<A, B> = A extends B ? (B extends A ? true : false) : false;
-type LeftIfNotEqual<A, B> = IsEqual<A, B> extends false ? A : never;
 type Spreadable<T> = T extends any[] ? T : never;
 
-type Replace<Source, A, B, Sentinel = never> = Source extends Sentinel
-  ? Omit<Source, keyof Sentinel> extends infer T
-    ? Replace<LeftIfNotEqual<T, {}>, A, B, Sentinel> extends infer U
-      ? U | B
-      : never // Dummy ternary just so we can get an alias T
-    : never // Dummy ternary just so we can get an alias U
+type Replace<Source, A, B, Sentinel = never> = Source extends infer T & Sentinel
+  ? Replace<T, A, B, Sentinel>
   : Source extends Promise<infer T>
   ? Promise<Awaited<Replace<T, A, B, Sentinel>>>
   : Source extends [infer AItem, ...infer ARest]
