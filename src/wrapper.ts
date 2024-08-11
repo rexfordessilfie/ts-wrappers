@@ -59,5 +59,5 @@ type Replace<Source, A, B, Sentinel = never> = Source extends Sentinel
   : Source extends Record<string | number | symbol, any>
   ? { [K in keyof Source]: Replace<Source[K], A, B, Sentinel> }
   : Source extends A
-  ? Exclude<Source, A> | B
-  : Exclude<Source, A>;
+  ? Exclude<Source, A> & B
+  : Source;

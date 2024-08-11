@@ -3,7 +3,7 @@ import wrapper from "../src";
 
 import { expectType } from "tsd";
 
-test("has defulat export", (t) => {
+test("has default export", (t) => {
   t.truthy(wrapper);
 });
 
