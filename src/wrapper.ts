@@ -50,7 +50,7 @@ type Replace<Source, A, B, Sentinel = never> = Source extends Sentinel
       : never // Dummy ternary just so we can get an alias T
     : never // Dummy ternary just so we can get an alias U
   : Source extends Promise<infer T>
-  ? Promise<Replace<T, A, B, Sentinel>>
+  ? Promise<Awaited<Replace<T, A, B, Sentinel>>>
   : Source extends [infer AItem, ...infer ARest]
   ? [
       Replace<AItem, A, B, Sentinel>,
