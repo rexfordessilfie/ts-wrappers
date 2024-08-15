@@ -1,5 +1,5 @@
 export default function wrapper<CArgs extends any[], CReturn>(
-  cb: (fn: Fn<UnspecifiedReturnType, CArgs>, ...args: CArgs) => CReturn
+  cb: (fn: Fn<FnReturnType, CArgs>, ...args: CArgs) => CReturn
 ) {
   return <FArgs extends CArgs, FReturn>(func: Func<FArgs, FReturn>) => {
     return function (...args: Parameters<typeof func>) {
@@ -13,17 +13,17 @@ export default function wrapper<CArgs extends any[], CReturn>(
   };
 }
 
-declare const return_type: unique symbol;
+declare const brand: unique symbol;
 
-type BrandedReturnType<T, TBrand extends string> = T & {
-  [return_type]: TBrand;
+type Brand<T, TBrand extends string> = T & {
+  [brand]: TBrand;
 };
 
 export type Func<Args extends any[], Return> = (...args: Args) => Return;
-type Unspecified = "unspecified";
-type UnspecifiedReturnType = BrandedReturnType<{}, Unspecified>;
+type FnReturnBrand = "__fn_return__";
+type FnReturnType = Brand<{}, FnReturnBrand>;
 
-type Fn<ReturnType = UnspecifiedReturnType, ArgsType extends any[] = any[]> = <
+type Fn<ReturnType = FnReturnType, ArgsType extends any[] = any[]> = <
   Return = ReturnType,
   Args extends any[] = ArgsType
 >(
